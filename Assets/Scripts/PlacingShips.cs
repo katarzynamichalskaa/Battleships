@@ -2,77 +2,103 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlacingShips : MonoBehaviour
+public class ShipScript : MonoBehaviour
 {
-    public List<Transform> targetAreas;
-    private Vector3 initialPosition;
-    private Vector3 dragOffset;
-    private bool isDragging = false;
 
-    private void Start()
+    public enum ShipType
     {
-        initialPosition = transform.position;
+        OneCellShip,
+        TwoCellsShip,
+        ThreeCellsShip,
+        FourCellsShip,
+        Unknown
     }
 
-    void OnMouseDown()
+    private List<Vector3> shipPositions = new List<Vector3>();
+    private ShipType type;
+    private bool isShipPlaced = false;
+    private int ListIndex = 0;
+    [SerializeField] float xOffset;
+    [SerializeField] GameManager gameManager;
+
+    void Start()
     {
-        isDragging = true;
-        dragOffset = transform.position - GetMousePos();
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
-    void OnMouseDrag()
+    public void ChangeColor(GameObject obj, Vector3 position)
     {
-        if (isDragging)
+        type = CheckType(obj);
+        isShipPlaced = false;
+
+        if (type == ShipType.OneCellShip)
         {
-            transform.position = GetMousePos() + dragOffset;
+            Color customColor = new Color(0.83f, 0.68f, 0.46f, 0.8f);
+            StartCoroutine(Blink(obj.GetComponent<Renderer>().material, customColor));
         }
-    }
-
-    private void OnMouseUp()
-    {
-        if (IsInAnyTargetArea())
+        else if (type == ShipType.TwoCellsShip)
         {
-            Debug.Log("Statek umieszczony w odpowiednim miejscu!");
+            Color customColor = new Color(0.71f, 0.40f, 0.16f, 1.0f);
+            StartCoroutine(Blink(obj.GetComponent<Renderer>().material, customColor));
+        }
+        else if (type == ShipType.ThreeCellsShip)
+        {
+            Color customColor = new Color(0.2f, 0.6f, 0.4f, 1.0f);
+            StartCoroutine(Blink(obj.GetComponent<Renderer>().material, customColor));
+        }
+        else if (type == ShipType.FourCellsShip)
+        {
+            Color customColor = new Color(0.2f, 0.4f, 0.6f, 0.8f);
+            StartCoroutine(Blink(obj.GetComponent<Renderer>().material, customColor));
         }
         else
         {
-            transform.position = initialPosition;
+            Debug.Log("Unknown ship");
         }
     }
-
-    private bool IsInAnyTargetArea()
+    public void MoveShip(Vector3 position)
     {
-        foreach (Transform targetArea in targetAreas)
+        transform.position = new Vector3(position.x + xOffset, position.y, position.z);
+        isShipPlaced = true;
+    }
+
+
+    private ShipType CheckType(GameObject ship)
+    {
+        if (ship.CompareTag("1cell_ship"))
         {
-            if (IsInTargetArea(targetArea))
-            {
-                return true;
-            }
+            return ShipType.OneCellShip;
         }
-
-        return false;
+        else if (ship.CompareTag("2cells_ship"))
+        {
+            return ShipType.TwoCellsShip;
+        }
+        else if (ship.CompareTag("3cells_ship"))
+        {
+            return ShipType.ThreeCellsShip;
+        }
+        else if (ship.CompareTag("4cells_ship"))
+        {
+            return ShipType.FourCellsShip;
+        }
+        else
+        {
+            return ShipType.Unknown;
+        }
     }
 
-    private bool IsInTargetArea(Transform targetArea)
+    private IEnumerator Blink(Material material, Color blinkColor)
     {
-        Vector3 targetPosition = targetArea.position;
-        Vector3 shipPosition = transform.position;
-        float targetWidth = targetArea.localScale.x;
-        float targetHeight = targetArea.localScale.y;
+        Color originalColor = material.color;
+        float blinkDuration = 0.2f; 
 
-        bool isInsideX = shipPosition.x >= targetPosition.x - targetWidth / 2f && shipPosition.x <= targetPosition.x + targetWidth / 2f;
-        bool isInsideY = shipPosition.y >= targetPosition.y - targetHeight / 2f && shipPosition.y <= targetPosition.y + targetHeight / 2f;
-        bool isOnEdgeX = Mathf.Approximately(shipPosition.x, targetPosition.x - targetWidth / 2f) || Mathf.Approximately(shipPosition.x, targetPosition.x + targetWidth / 2f);
-        bool isOnEdgeY = Mathf.Approximately(shipPosition.y, targetPosition.y - targetHeight / 2f) || Mathf.Approximately(shipPosition.y, targetPosition.y + targetHeight / 2f);
-
-        return (isInsideX && isInsideY) || (isOnEdgeX && isInsideY) || (isInsideX && isOnEdgeY);
+        while (!isShipPlaced)
+        {
+            material.color = blinkColor;
+            yield return new WaitForSeconds(blinkDuration);
+            material.color = originalColor;
+            yield return new WaitForSeconds(blinkDuration);
+        }
     }
 
-
-    Vector3 GetMousePos()
-    {
-        var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mousePos.z = 0;
-        return mousePos;
-    }
 }

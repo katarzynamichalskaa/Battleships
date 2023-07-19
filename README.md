@@ -1,4 +1,6 @@
 # BattleShips
 
-https://github.com/katarzynamichalskaa/BattleShips/assets/92379328/77481dc8-1a22-4454-8f7c-a83d955b491f
+https://github.com/katarzynamichalskaa/BattleShips/assets/92379328/078f6d68-7f73-4f94-895c-b54107e4c60a
+
+
 

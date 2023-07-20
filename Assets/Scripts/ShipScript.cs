@@ -13,8 +13,6 @@ public class ShipScript : MonoBehaviour
         FourCellsShip,
         Unknown
     }
-
-    private List<Vector3> shipPositions = new List<Vector3>();
     private ShipType type;
     private bool isShipPlaced = false;
     private int ListIndex = 0;
@@ -26,9 +24,8 @@ public class ShipScript : MonoBehaviour
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
-    public void ChangeColor(GameObject obj, Vector3 position)
+    public void ChangeColor(GameObject obj, Vector3 position, ShipType type)
     {
-        type = CheckType(obj);
         isShipPlaced = false;
 
         if (type == ShipType.OneCellShip)
@@ -63,7 +60,7 @@ public class ShipScript : MonoBehaviour
     }
 
 
-    private ShipType CheckType(GameObject ship)
+    public ShipType CheckType(GameObject ship)
     {
         if (ship.CompareTag("1cell_ship"))
         {
@@ -98,6 +95,31 @@ public class ShipScript : MonoBehaviour
             yield return new WaitForSeconds(blinkDuration);
             material.color = originalColor;
             yield return new WaitForSeconds(blinkDuration);
+        }
+    }
+
+    public void RotateShip(int Counter)
+    {
+
+        if(Counter == 2)
+        {
+            transform.Rotate(Vector3.forward, 90f);
+            transform.Rotate(Vector3.up, 180f);
+        }
+        else if (Counter == 3)
+        {
+            transform.Rotate(Vector3.up, -180f);
+            transform.Rotate(Vector3.forward, 90f);
+        }
+        else if (Counter == 4)
+        {
+            transform.Rotate(Vector3.forward, -90f);
+            transform.Rotate(Vector3.up, 0f);
+        }
+        else
+        {
+            transform.Rotate(Vector3.forward, -90f);
+
         }
     }
 

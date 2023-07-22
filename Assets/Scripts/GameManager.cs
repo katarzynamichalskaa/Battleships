@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
 
 
 public class GameManager : MonoBehaviour
@@ -10,8 +12,8 @@ public class GameManager : MonoBehaviour
     private int numberOfShips = 10;
     private Vector3 chosenPosition;
     private bool isShipChosen = false;
-    private bool isItFirstPlacement = true;
     private bool isPositionAccepted;
+    private bool isPositionAcceptedAfterRemoving;
     private int arrayIndex = 0;
     private List<Vector3> selectedTileList = new List<Vector3>();
     [SerializeField] ShipScript.ShipType type;
@@ -24,12 +26,23 @@ public class GameManager : MonoBehaviour
     {
         selectedShip = null;
         selectedTile = null;
+
+        nextButton = GameObject.Find("NextButton").GetComponent<Button>();
+        textChangePosition = GameObject.Find("ChangePosition").GetComponent<Button>();
+
         nextButton.gameObject.SetActive(false);
         textChangePosition.gameObject.SetActive(false);
     }
 
     private void Update()
     {
+
+        if(nextButton == null || textChangePosition == null)
+        {
+            nextButton = GameObject.Find("NextButton").GetComponent<Button>();
+            textChangePosition = GameObject.Find("ChangePosition").GetComponent<Button>();
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
 
@@ -45,16 +58,12 @@ public class GameManager : MonoBehaviour
                     {
                         if (hit.point.x >= -7.9f && hit.point.x <= -3f && hit.point.y >= -6f && hit.point.y <= 4f)
                         {
-                            isItFirstPlacement = true;
-                            InitializeNewPosition(ship, hit, isItFirstPlacement);
+                            InitializeNewPosition(ship, hit);
                         }
 
                         else
                         {
-                            isItFirstPlacement = false;
-                            selectedTileList.Clear();
-
-                            InitializeNewPosition(ship, hit, isItFirstPlacement);
+                            UnityEngine.Debug.Log("You can't change position of your ship already!");
                         }
                     }
                 }
@@ -64,6 +73,7 @@ public class GameManager : MonoBehaviour
             {
                 if (hit.collider != null && hit.collider.CompareTag("Cell"))
                 {
+
                     //tile logic
                     TileScript tile = hit.collider.GetComponent<TileScript>();
                     selectedTile = tile;
@@ -75,6 +85,7 @@ public class GameManager : MonoBehaviour
                     {
                         chosenPosition = hit.transform.position;
                         selectedShip.MoveShip(chosenPosition, type);
+                        numberOfShips = numberOfShips - 1;
                         isShipChosen = false;
                     }
 
@@ -82,11 +93,6 @@ public class GameManager : MonoBehaviour
                     {
                         textChangePosition.gameObject.SetActive(true);
                         Invoke("HideTextChangePosition", 1.0f);
-                    }
-
-                    if (isItFirstPlacement && isPositionAccepted)
-                    {
-                        numberOfShips = numberOfShips - 1;
                     }
 
                 }
@@ -116,7 +122,7 @@ public class GameManager : MonoBehaviour
         nextButton.gameObject.SetActive(true);
     }
 
-    private void InitializeNewPosition(ShipScript ship, RaycastHit2D hit, bool isItFirstPlacement)
+    private void InitializeNewPosition(ShipScript ship, RaycastHit2D hit)
     {
         isShipChosen = true;
         selectedShip = ship;
@@ -127,26 +133,70 @@ public class GameManager : MonoBehaviour
 
 
         //initialize shining during click 
-        ship.ChangeColor(hit.collider.gameObject, chosenPosition, type);
-
-        //if it isn't first placement then remove position
-        if(isItFirstPlacement)
-        {
-            selectedTileList.Remove(ship.transform.position);
-            selectedTileList.Add(chosenPosition);
-        }
+        ship.ChangeColor(hit.collider.gameObject, type);
 
     }
 
     private bool tryAddToArray(Vector3 tilePosition)
     {
-        if (selectedTileList.Contains(tilePosition))
+        UnityEngine.Debug.Log(type);
+
+        if (type == ShipScript.ShipType.OneCellShip)
         {
+            if (selectedTileList.Contains(tilePosition))
+            {
+                return false;
+            }
+
+            selectedTileList.Add(tilePosition);
+
+            return true;
+        }
+
+        else if (type == ShipScript.ShipType.TwoCellsShip)
+        {
+            UnityEngine.Debug.Log("nana");
+
+            int Rotated = selectedShip.ReturnIfRotated();
+
+            UnityEngine.Debug.Log(Rotated);
+
+
+            if (Rotated == 1)
+            {
+
+                if (selectedTileList.Contains(tilePosition))
+                {
+                    return false;
+                }
+
+                selectedTileList.Add(tilePosition);
+                selectedTileList.Add(tilePosition + new Vector3(0.9f, 0f, 0f));
+
+                return true;
+            }
+
+            else
+            {
+                if (selectedTileList.Contains(tilePosition))
+                {
+                    return false;
+                }
+
+                selectedTileList.Add(tilePosition);
+                selectedTileList.Add(tilePosition + new Vector3(0f, 0.9f, 0f));
+
+                return true;
+            }
+
             return false;
         }
 
-        selectedTileList.Add(tilePosition);
-        return true;
+
+
+        return false;
+
+
 
     }
 

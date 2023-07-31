@@ -6,7 +6,9 @@ using UnityEngine;
 public class TileScript : MonoBehaviour
 {
     [SerializeField] GameObject[] ships;
-    [SerializeField] bool isAvailable = true;
+    [SerializeField] bool isAvailable;
+    bool anyObjectCollides = false;
+    private bool once = true;
 
     void Update()
     {
@@ -22,13 +24,13 @@ public class TileScript : MonoBehaviour
             if (Physics2D.OverlapBox(transform.position, transform.localScale, 0f) == obj.GetComponent<Collider2D>())
             {
                 isAvailable = false;
-                
+                break;
             }
-
             else
             {
                 isAvailable = true;
             }
+           
         }
     }
 
@@ -43,7 +45,7 @@ public class TileScript : MonoBehaviour
     }
     public void ResetAvailability()
     {
-        isAvailable = false;
+        isAvailable = true;
     }
 
 }

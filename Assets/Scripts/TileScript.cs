@@ -7,8 +7,6 @@ public class TileScript : MonoBehaviour
 {
     [SerializeField] GameObject[] ships;
     [SerializeField] bool isAvailable;
-    bool anyObjectCollides = false;
-    private bool once = true;
 
     void Update()
     {

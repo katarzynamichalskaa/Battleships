@@ -19,6 +19,14 @@ public class ShipScript : MonoBehaviour
     private int ListIndex = 0;
     private bool isRotated = false;
     private int Counter = 0;
+    private Transform rightBondTransform;
+    private Transform leftBondTransform;
+    private float rightBond = 7f;
+    private float leftBond = -1.8f;
+    private float downBond = -4.5f;
+    private float upBond = 4.5f;
+
+    [SerializeField] GameObject[] bonds;
     [SerializeField] float xOffset;
     [SerializeField] float xOffsetRotated;
     [SerializeField] float yOffset;
@@ -50,7 +58,7 @@ public class ShipScript : MonoBehaviour
             Color customColor = new Color(0.2f, 0.6f, 0.4f, 1.0f);
             StartCoroutine(Blink(obj.GetComponent<Renderer>().material, customColor));
         }
-        else 
+        else
         {
             Color customColor = new Color(0.2f, 0.4f, 0.6f, 0.8f);
             StartCoroutine(Blink(obj.GetComponent<Renderer>().material, customColor));
@@ -59,83 +67,33 @@ public class ShipScript : MonoBehaviour
 
     public void MoveShip(Vector3 position, ShipType type)
     {
-
-        transform.position = new Vector3(position.x + xOffset, position.y, position.z);
-
-        //add offset if the second and fourth one is rotated
-        if(isRotated && type == ShipType.FourCellsShip)
+        //add offset if rotated ship need this
+        if (isRotated)
         {
             transform.position = new Vector3(position.x + xOffsetRotated, position.y + yOffset, position.z);
         }
 
-        if (isRotated && type == ShipType.TwoCellsShip)
+        else if (!isRotated)
         {
-            transform.position = new Vector3(position.x + xOffsetRotated, position.y + yOffset, position.z);
+            transform.position = new Vector3(position.x + xOffset, position.y, position.z);
         }
 
-        //LOGIC IF SHIPS ARE ROTATED
-        if (isRotated && type == ShipType.FourCellsShip && position.y <= 4.0f && position.y >= 2.5f)
-        {
-            transform.position = new Vector3(position.x, position.y - 1.3f, position.z);
-        }
-        else if (isRotated && type == ShipType.FourCellsShip && position.y <= -3.0f && position.y >= -5.0f)
-        {
-            transform.position = new Vector3(position.x, position.y + 1.3f, position.z);
-        }
+        rightBondTransform = transform.Find("RightBond");
+        leftBondTransform = transform.Find("LeftBond");
 
-        else if (isRotated && type == ShipType.ThreeCellsShip && position.y <= 4.0f && position.y >= 2.5f)
+        if (rightBondTransform.position.x >= rightBond || rightBondTransform.position.y <= downBond) 
         {
-            transform.position = new Vector3(position.x, position.y - 1.1f, position.z);
+            isShipPlaced = false;
         }
-        else if (isRotated && type == ShipType.ThreeCellsShip && position.y <= -3.0f && position.y >= -5.0f)
+        else if(leftBondTransform.position.x <= leftBond || leftBondTransform.position.y >= upBond)
         {
-            transform.position = new Vector3(position.x, position.y + 1.0f, position.z);
+            isShipPlaced = false;
         }
-
-        else if (isRotated && type == ShipType.TwoCellsShip && position.y <= -3.0f && position.y >= -5.0f)
+        else
         {
-            transform.position = new Vector3(position.x, position.y + 0.55f, position.z);
+            isShipPlaced = true;
+
         }
-
-        else if (isRotated && type == ShipType.TwoCellsShip && position.y <= 4.0f && position.y >= 2.5f)
-        {
-            transform.position = new Vector3(position.x, position.y - 0.5f, position.z) ;
-        }
-
-
-
-        //LOGIC IF SHIPS AREN'T ROTATED
-        if (!isRotated && type == ShipType.FourCellsShip && position.x <= 7.0f && position.x >= 5.5f)
-        {
-            transform.position = new Vector3(position.x - 1.2f, position.y, position.z);
-        }
-
-        else if (!isRotated && type == ShipType.FourCellsShip && position.x <= -1.0f && position.x >= -2.0f)
-        {
-            transform.position = new Vector3(position.x + 1.2f, position.y, position.z);
-        }
-
-        else if (!isRotated && type == ShipType.ThreeCellsShip && position.x <= 7.0f && position.x >= 5.5f)
-        {
-            transform.position = new Vector3(position.x - 0.9f, position.y, position.z);
-        }
-
-        else if (!isRotated && type == ShipType.ThreeCellsShip && position.x <= -1.0f && position.x >= -2.0f)
-        {
-            transform.position = new Vector3(position.x + 0.9f, position.y, position.z);
-        }
-
-        else if (!isRotated && type == ShipType.ThreeCellsShip && position.x <= -1.0f && position.x >= -2.0f)
-        {
-            transform.position = new Vector3(position.x + 0.6f, position.y, position.z);
-        }
-
-        if (!isRotated && type == ShipType.TwoCellsShip && position.x <= 7.0f && position.x >= 5.5f)
-        {
-            transform.position = new Vector3(position.x - 0.5f, position.y, position.z);
-        }
-
-        isShipPlaced = true;
     }
 
 
@@ -190,9 +148,9 @@ public class ShipScript : MonoBehaviour
         }
     }
 
-    public int ReturnIfRotated()
+    public bool ReturnPlacement()
     {
-        return Counter + 1;
+        return isShipPlaced;
     }
 
 }

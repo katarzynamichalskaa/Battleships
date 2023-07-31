@@ -26,13 +26,12 @@ public class ShipScript : MonoBehaviour
     private float downBond = -4.5f;
     private float upBond = 4.5f;
 
-    [SerializeField] GameObject[] bonds;
+    [SerializeField] GameObject[] ships;
     [SerializeField] float xOffset;
     [SerializeField] float xOffsetRotated;
     [SerializeField] float yOffset;
     [SerializeField] GameManager gameManager;
     [SerializeField] TileScript selectedTile;
-
 
     void Start()
     {
@@ -92,8 +91,21 @@ public class ShipScript : MonoBehaviour
         else
         {
             isShipPlaced = true;
+        }
+
+        foreach (GameObject ship in ships)
+        {
+            if (Physics2D.OverlapBox(transform.position, transform.localScale, 0f) == ship.GetComponent<Collider2D>())
+            {
+                isShipPlaced = false;
+                gameManager.StartCoroutine(gameManager.Wait());
+                break;
+            }
 
         }
+
+        Physics.SyncTransforms();
+
     }
 
 

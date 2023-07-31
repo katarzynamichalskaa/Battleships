@@ -77,7 +77,7 @@ public class GameManager : MonoBehaviour
                     TileScript tile = hit.collider.GetComponent<TileScript>();
                     selectedTile = tile;
 
-                    if(selectedTile.ReturnAvailability() == true)
+                    if (selectedTile.ReturnAvailability() == true)
                     {
                         selectedTile.SetAvailability();
                         chosenPosition = hit.transform.position;
@@ -90,19 +90,19 @@ public class GameManager : MonoBehaviour
                         {
                             numberOfShips = numberOfShips - 1;
                             isShipChosen = false;
+
                         }
-                        else
+                        else if(!isProperlyPlaced)
                         {
-                            chosenPosition = Vector3.zero;
                             selectedTile.ResetAvailability();
+                            chosenPosition = Vector3.zero;
                         }
 
                     }
 
                     else if(selectedTile.ReturnAvailability() == false)
                     {
-                        textChangePosition.gameObject.SetActive(true);
-                        Invoke("HideTextChangePosition", 1.0f);
+                        StartCoroutine(Wait());
                     }
 
                 }
@@ -123,11 +123,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void HideTextChangePosition()
-    {
-        textChangePosition.gameObject.SetActive(false);
-    }
-
     public void DisplayButtonNext()
     {
         nextButton.gameObject.SetActive(true);
@@ -146,5 +141,11 @@ public class GameManager : MonoBehaviour
         ship.ChangeColor(hit.collider.gameObject, type);
     }
 
+    public IEnumerator Wait()
+    {
+        textChangePosition.gameObject.SetActive(true);
+        yield return new WaitForSeconds(1f);
+        textChangePosition.gameObject.SetActive(false);
+    }
 
 }

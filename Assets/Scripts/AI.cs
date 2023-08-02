@@ -1,20 +1,26 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class AI : MonoBehaviour
 {
-    private bool isAvailable = true;
     private List<Tuple<int, int>> usedIndices = new List<Tuple<int, int>>();
+    private List<Tuple<int, int>> temporaryIndices = new List<Tuple<int, int>>();
     [SerializeField] GameObject[,] enemyTiles = new GameObject[10, 10];
 
     void Start()
     {
-        Generate(4, 1);
-        Generate(3, 2);
-        Generate(2, 3);
-        Generate(1, 4);
+        Generate(4, 1); //generate 4 one-tile-sized ships
+        Generate(3, 2); //generate 3 two-tiles-sized ships
+        Generate(2, 3); //generate 2 three-tiles-sized ships
+        Generate(1, 4); //generate 1 four-tiles-sized ship
+
+        foreach (var position in usedIndices)
+        {
+            UnityEngine.Debug.Log("Pozycja [" + position.Item1 + "," + position.Item2 + "]");
+        }
     }
 
     void Generate(int shipsToGenerate, int shipSize)
@@ -33,50 +39,61 @@ public class AI : MonoBehaviour
 
             usedIndices.Add(new Tuple<int, int>(x, y));
 
-            UnityEngine.Debug.Log("Pozycja [" + x + "," + y + "]");
+            temporaryIndices.Clear();
 
             if (shipSize > 1)
             {
                 int direction;
                 int nextX;
                 int nextY;
-                int pos = 2;
+                bool isValidPosition;
 
                 do
                 {
-                    direction = UnityEngine.Random.Range(0, 4); // Losujemy kierunek (0 - góra, 1 - dół, 2 - lewo, 3 - prawo)
+                    direction = UnityEngine.Random.Range(0, 4); //generate random direction (0 - up, 1 - down, 2 - left, 3 - right)
                     nextX = x;
                     nextY = y;
+                    isValidPosition = true;
 
                     for (int j = 0; j < shipSize - 1; j++)
                     {
-                        if (direction == 0 && nextY < 9) // Góra
+                        if (direction == 0 && nextY < 9) //up
                         {
                             nextY++;
                         }
-                        else if (direction == 1 && nextY > 0) // Dół
+                        else if (direction == 1 && nextY > 0) //down
                         {
                             nextY--;
                         }
-                        else if (direction == 2 && nextX > 0) // Lewo
+                        else if (direction == 2 && nextX > 0) //left
                         {
                             nextX--;
                         }
-                        else if (direction == 3 && nextX < 9) // Prawo
+                        else if (direction == 3 && nextX < 9) // right
                         {
                             nextX++;
                         }
-
-                        if (nextX < 0 || nextX >= 10 || nextY < 0 || nextY >= 10 || usedIndices.Contains(new Tuple<int, int>(nextX, nextY)))
+                        else
                         {
+                            temporaryIndices.Clear();
+                            isValidPosition = false;
                             break;
                         }
 
-                        UnityEngine.Debug.Log("Pozycja " + pos + " [" + nextX + "," + nextY + "]");
-                        pos++;
+                        if (usedIndices.Contains(new Tuple<int, int>(nextX, nextY)))
+                        {
+                            temporaryIndices.Clear();
+                            isValidPosition = false;
+                            break;
+                        }
+
+                        temporaryIndices.Add(new Tuple<int, int>(nextX, nextY));
+
                     }
-                } while (nextX < 0 || nextX >= 10 || nextY < 0 || nextY >= 10 || usedIndices.Contains(new Tuple<int, int>(nextX, nextY)));
+                } while (!isValidPosition);
             }
+
+            usedIndices.AddRange(temporaryIndices);
         }
     }
 }

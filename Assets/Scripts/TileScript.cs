@@ -2,11 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 
 public class TileScript : MonoBehaviour
 {
     [SerializeField] GameObject[] ships;
-    [SerializeField] bool isAvailable;
+    public bool hasShip = false;
+    private Renderer cellRenderer;
 
     void Update()
     {
@@ -18,15 +21,15 @@ public class TileScript : MonoBehaviour
         Physics.SyncTransforms();
 
         foreach (GameObject obj in ships)
-        {    
-            if (Physics2D.OverlapBox(transform.position, transform.localScale, 0f) == obj.GetComponent<Collider2D>())
+        {
+            if(Physics2D.OverlapBox(transform.position, transform.localScale, 0f, LayerMask.GetMask("Ship"))) 
             {
-                isAvailable = false;
+                hasShip = true;
                 break;
             }
             else
             {
-                isAvailable = true;
+                hasShip = false;
             }
            
         }
@@ -34,16 +37,22 @@ public class TileScript : MonoBehaviour
 
     public bool ReturnAvailability()
     {
-        return isAvailable;
+        return hasShip;
     }
 
     public void SetAvailability()
     {
-        isAvailable = false;
+        hasShip = true;
     }
     public void ResetAvailability()
     {
-        isAvailable = true;
+        hasShip = false;
+    }
+
+    public void SetCellColor(Color color)
+    {
+        cellRenderer = GetComponent<Renderer>();
+        cellRenderer.material.color = color;
     }
 
 }

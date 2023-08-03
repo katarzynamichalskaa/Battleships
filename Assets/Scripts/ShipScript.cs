@@ -16,7 +16,6 @@ public class ShipScript : MonoBehaviour
 
     private ShipType type;
     private bool isShipPlaced = false;
-    private int ListIndex = 0;
     private bool isRotated = false;
     private int Counter = 0;
     private Transform rightBondTransform;
@@ -80,22 +79,27 @@ public class ShipScript : MonoBehaviour
         rightBondTransform = transform.Find("RightBond");
         leftBondTransform = transform.Find("LeftBond");
 
+        //if ship is outside the borders
         if (rightBondTransform.position.x >= rightBond || rightBondTransform.position.y <= downBond) 
         {
             isShipPlaced = false;
+            gameManager.StartCoroutine(gameManager.Wait());
         }
         else if(leftBondTransform.position.x <= leftBond || leftBondTransform.position.y >= upBond)
         {
             isShipPlaced = false;
+            gameManager.StartCoroutine(gameManager.Wait());
+
         }
         else
         {
             isShipPlaced = true;
         }
-
+        
+        //if ships overlap
         foreach (GameObject ship in ships)
         {
-            if (Physics2D.OverlapBox(transform.position, transform.localScale, 0f) == ship.GetComponent<Collider2D>())
+            if (Physics2D.OverlapBox(transform.position, transform.localScale, 0f, LayerMask.GetMask("Ship")))
             {
                 isShipPlaced = false;
                 gameManager.StartCoroutine(gameManager.Wait());

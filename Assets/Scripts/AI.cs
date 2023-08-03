@@ -9,6 +9,7 @@ public class AI : MonoBehaviour
     private List<Tuple<int, int>> usedIndices = new List<Tuple<int, int>>();
     private List<Tuple<int, int>> temporaryIndices = new List<Tuple<int, int>>();
     [SerializeField] GameObject[,] enemyTiles = new GameObject[10, 10];
+    [SerializeField] GameObject cellPrefab; 
 
     void Start()
     {
@@ -17,10 +18,8 @@ public class AI : MonoBehaviour
         Generate(2, 3); //generate 2 three-tiles-sized ships
         Generate(1, 4); //generate 1 four-tiles-sized ship
 
-        foreach (var position in usedIndices)
-        {
-            UnityEngine.Debug.Log("Pozycja [" + position.Item1 + "," + position.Item2 + "]");
-        }
+        RenderBoard();
+
     }
 
     void Generate(int shipsToGenerate, int shipSize)
@@ -94,6 +93,29 @@ public class AI : MonoBehaviour
             }
 
             usedIndices.AddRange(temporaryIndices);
+        }
+    }
+
+    void RenderBoard()
+    {
+        float cellSize = 0.9f;
+        float yOffset = -4.5f;
+        float xOffset = -4.5f;
+
+        for (int x = 0; x < 10; x++)
+        {
+            for (int y = 0; y < 10; y++)
+            {
+                GameObject cell = Instantiate(cellPrefab, new Vector3(x*cellSize + xOffset, y*cellSize + yOffset, 0), Quaternion.identity);
+                enemyTiles[x, y] = cell;
+                bool hasShip = usedIndices.Contains(new Tuple<int, int>(x, y));
+                cell.GetComponent<TileScript>().hasShip = hasShip;
+
+                if (hasShip)
+                {
+                    cell.GetComponent<TileScript>().SetCellColor(Color.red);
+                }
+            }
         }
     }
 }

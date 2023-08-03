@@ -77,10 +77,10 @@ public class GameManager : MonoBehaviour
                     TileScript tile = hit.collider.GetComponent<TileScript>();
                     selectedTile = tile;
 
-                    if (selectedTile.ReturnAvailability() == true)
+                    if (selectedTile.ReturnAvailability() == false)
                     {
-                        selectedTile.SetAvailability();
                         chosenPosition = hit.transform.position;
+                        selectedTile.SetAvailability();
                         selectedShip.MoveShip(chosenPosition, type);
 
                         //check if ship doesnt collide with other ships or is outside the border
@@ -100,7 +100,7 @@ public class GameManager : MonoBehaviour
 
                     }
 
-                    else if(selectedTile.ReturnAvailability() == false)
+                    else if(selectedTile.ReturnAvailability() == true)
                     {
                         StartCoroutine(Wait());
                     }

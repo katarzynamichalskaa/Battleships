@@ -49,10 +49,4 @@ public class TileScript : MonoBehaviour
         hasShip = false;
     }
 
-    public void SetCellColor(Color color)
-    {
-        cellRenderer = GetComponent<Renderer>();
-        cellRenderer.material.color = color;
-    }
-
 }

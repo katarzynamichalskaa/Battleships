@@ -7,6 +7,7 @@ using UnityEngine;
 public class AI : MonoBehaviour
 {
     private List<Tuple<int, int>> usedIndices = new List<Tuple<int, int>>();
+    private List<Tuple<int, int>> chosenIndices = new List<Tuple<int, int>>();
     private List<Tuple<int, int>> temporaryIndices = new List<Tuple<int, int>>();
     [SerializeField] GameObject[,] enemyTiles = new GameObject[10, 10];
     [SerializeField] GameObject cellPrefab; 
@@ -110,12 +111,25 @@ public class AI : MonoBehaviour
                 enemyTiles[x, y] = cell;
                 bool hasShip = usedIndices.Contains(new Tuple<int, int>(x, y));
                 cell.GetComponent<TileScript>().hasShip = hasShip;
-
-                if (hasShip)
-                {
-                    cell.GetComponent<TileScript>().SetCellColor(Color.red);
-                }
             }
         }
+    }
+
+    public (int x, int y) ChooseTile()
+    {
+        int x;
+        int y;
+
+        do
+        {
+            x = UnityEngine.Random.Range(0, 10);
+            y = UnityEngine.Random.Range(0, 10);
+
+        } while (chosenIndices.Contains(new Tuple<int, int>(x, y)));
+
+        chosenIndices.Add(new Tuple<int, int>(x, y));
+
+        return (x, y);
+
     }
 }

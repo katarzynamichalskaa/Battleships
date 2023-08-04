@@ -3,57 +3,112 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 
 public class GameLogic : MonoBehaviour
 {
     TileScript selectedTile;
     private int Turn = 1;
+    private int enemyShipsNumber = 20;
+    private int playerShipsNumber = 20;
     private bool isTileChoosen = false;
+    private bool enemyChoosenTile = false;
+    private bool enemyTilesFound = false;
+    AI ai;
+    [SerializeField] Text yourTurn;
+    [SerializeField] Text enemyTurn;
+    [SerializeField] Button youWin;
+    [SerializeField] Button youLost;
+    [SerializeField] Button backToMenu;
     [SerializeField] GameObject fire;
+    [SerializeField] GameObject missed;
     [SerializeField] List<GameObject> playerTiles = new List<GameObject>();
+    [SerializeField] List<GameObject> playerUI = new List<GameObject>();
+    [SerializeField] List<GameObject> enemyUI = new List<GameObject>();
+    [SerializeField] List<GameObject> enemyTiles = new List<GameObject>();
     [SerializeField] List<GameObject> playerShips = new List<GameObject>();
     Dictionary<string, List<GameObject>> shipDictionary = new Dictionary<string, List<GameObject>>();
 
-    // Start is called before the first frame update
     void Start()
     {
         selectedTile = null;
+        youWin.gameObject.SetActive(false);
+        youLost.gameObject.SetActive(false);
+        backToMenu.gameObject.SetActive(false);
+        ai = GameObject.Find("EnemyManager").GetComponent<AI>();
         GameObject[] cells = GameObject.FindGameObjectsWithTag("Cell");
         playerTiles.AddRange(cells);
         ShipFinding();
     }
 
-    // Update is called once per frame
     void Update()
     {
+        if (!enemyTilesFound)
+        {
+            GameObject[] enemyCells = GameObject.FindGameObjectsWithTag("EnemyCell");
+            enemyTiles.AddRange(enemyCells);
+            enemyTilesFound = true;
+        }
+
         if (Turn == 1)
         {
-            SetActive(playerTiles);
-            SetActive(playerShips);
-
-            if(!isTileChoosen)
+            SetUI(true);
+   
+            if (!isTileChoosen)
             {
                 ChooseTile();
             }
-
-
         }
 
         if (Turn == 2)
         {
+            SetUI(false);
 
+            if (!enemyChoosenTile)
+            {
+                enemyChoosenTile = true;
+                (int x, int y) position = ai.ChooseTile();
+                TileScript enemyChosenTile = GetTileAtPosition(position.x, position.y, 10);
+
+                CheckIfHit(enemyChosenTile, enemyUI, enemyChoosenTile);
+            }
+           
+            StartCoroutine(Wait(1));
         }
 
+        if(enemyShipsNumber == 0)
+        {
+            Turn = 0;
+            youWin.gameObject.SetActive(true);
+            backToMenu.gameObject.SetActive(true);
+        }
+        else if(playerShipsNumber == 0)
+        {
+            Turn = 0;
+            youLost.gameObject.SetActive(true);
+            backToMenu.gameObject.SetActive(true);
+        }
 
     }
 
-    void SetActive(List<GameObject> list)
+    void SetActive(List<GameObject> list, bool active)
     {
         foreach (GameObject gameObject in list)
         {
-            gameObject.SetActive(false);
+            gameObject.SetActive(active);
         }
+    }
+
+    void SetUI(bool active)
+    {
+        yourTurn.enabled = active;
+        SetActive(enemyTiles, active);
+        SetActive(playerUI, active);
+        enemyTurn.enabled = !active;
+        SetActive(enemyUI, !active);
+        SetActive(playerTiles, !active);
+        SetActive(playerShips, !active);
     }
 
     void ShipFinding()
@@ -91,20 +146,10 @@ public class GameLogic : MonoBehaviour
             {
                 TileScript tile = hit.collider.GetComponent<TileScript>();
                 selectedTile = tile;
-                isTileChoosen = true;
 
-                if (selectedTile.ReturnAvailability() == true)
-                {
-                    Instantiate(fire, selectedTile.transform.position, Quaternion.identity);
-                }
+                CheckIfHit(selectedTile, playerUI, isTileChoosen);
 
-                else
-                {
-                    UnityEngine.Debug.Log("You missed!");
-
-                }
-
-                Turn = 2;
+                StartCoroutine(Wait(2));
             }
 
             else
@@ -113,4 +158,59 @@ public class GameLogic : MonoBehaviour
             }
         }
     }
+
+    IEnumerator Wait(int number)
+    {
+        yield return new WaitForSeconds(1.5f);
+        Turn = number;
+        isTileChoosen = false;
+        enemyChoosenTile = false;
+    }
+
+    TileScript GetTileAtPosition(int x, int y, int width)
+    {
+        int index = x + y * width;
+        if (index >= 0 && index < playerTiles.Count)
+        {
+            return playerTiles[index].GetComponent<TileScript>();
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    void CheckIfHit(TileScript selectedTile, List<GameObject> list, bool chosenTile)
+    {
+        chosenTile = true;
+
+        if (selectedTile.ReturnAvailability() == true)
+        {
+            GameObject newFire = Instantiate(fire, selectedTile.transform.position, Quaternion.identity);
+            list.Add(newFire);
+
+            if(Turn == 1)
+            {
+                enemyShipsNumber--;
+                UnityEngine.Debug.Log(enemyShipsNumber);
+            }
+            if(Turn == 2)
+            {
+                playerShipsNumber--;
+                UnityEngine.Debug.Log(playerShipsNumber);
+            }
+        }
+
+        else
+        {
+            GameObject newMissed = Instantiate(missed, selectedTile.transform.position, Quaternion.identity);
+            list.Add(newMissed);
+        }
+    }
+
+    public void LoadMenu()
+    {
+        SceneManager.LoadScene("Menu");
+    }
+
 }

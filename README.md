@@ -1,5 +1,5 @@
 # BattleShips
-BattleshipUnity is a classic 2D Battleship game developed in Unity, providing an immersive experience where players can engage in strategic naval warfare against an AI opponent. The game stays true to the timeless Battleship concept, allowing players to strategically position their fleet and attempt to sink the opponent's ships.
+BattleShips is a classic 2D Battleship game developed in Unity, providing an immersive experience where players can engage in strategic naval warfare against an AI opponent. The game stays true to the timeless Battleship concept, allowing players to strategically position their fleet and attempt to sink the opponent's ships.
 
 ## Key Features
 - **Classic Gameplay:** Experience the familiar and timeless gameplay of the classic Battleship board game in a digital format.
